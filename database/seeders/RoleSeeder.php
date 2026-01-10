@@ -21,10 +21,21 @@ class RoleSeeder extends Seeder
                 'name' => 'owner',
                 'description' => 'Food stall owner who can manage menu, categories, orders and view sales reports',
             ],
+            [
+                'name' => 'cashier',
+                'description' => 'Cashier who can create orders and process transactions',
+            ],
+            [
+                'name' => 'customer',
+                'description' => 'Customer who can place orders and view their order history',
+            ],
         ];
 
         foreach ($roles as $role) {
-            Role::create($role);
+            Role::firstOrCreate(
+                ['name' => $role['name']],
+                ['description' => $role['description']]
+            );
         }
     }
 }
