@@ -15,10 +15,8 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Get roles
-        $adminRole = Role::where('name', 'admin')->first();
-        $ownerRole = Role::where('name', 'owner')->first();
-        $cashierRole = Role::where('name', 'cashier')->first();
-        $customerRole = Role::where('name', 'customer')->orWhere('name', 'Customer')->first();
+        $adminRole = Role::where('name', 'Admin')->first();
+        $cashierRole = Role::where('name', 'Cashier')->first();
 
         // Create Admin User
         if ($adminRole) {
@@ -26,64 +24,38 @@ class UserSeeder extends Seeder
                 ['email' => 'admin@foodstall.com'],
                 [
                     'role_id' => $adminRole->id,
-                    'name' => 'Admin User',
-                    'password' => Hash::make('password'),
+                    'name' => 'Administrator',
+                    'password' => Hash::make('admin123'),
                 ]
             );
         }
 
-        // Create Owner User
-        if ($ownerRole) {
-            User::firstOrCreate(
-                ['email' => 'owner@foodstall.com'],
-                [
-                    'role_id' => $ownerRole->id,
-                    'name' => 'Owner User',
-                    'password' => Hash::make('password'),
-                ]
-            );
-
-            // Create additional owner for testing
-            User::firstOrCreate(
-                ['email' => 'budi@foodstall.com'],
-                [
-                    'role_id' => $ownerRole->id,
-                    'name' => 'Warung Pak Budi',
-                    'password' => Hash::make('password'),
-                ]
-            );
-        }
-
-        // Create Cashier User
+        // Create Cashier Users
         if ($cashierRole) {
             User::firstOrCreate(
-                ['email' => 'cashier@foodstall.com'],
+                ['email' => 'kasir1@foodstall.com'],
                 [
                     'role_id' => $cashierRole->id,
-                    'name' => 'Kasir 1',
-                    'password' => Hash::make('password'),
+                    'name' => 'Kasir Satu',
+                    'password' => Hash::make('kasir123'),
                 ]
             );
 
-            // Create additional cashier
             User::firstOrCreate(
-                ['email' => 'cashier2@foodstall.com'],
+                ['email' => 'kasir2@foodstall.com'],
                 [
                     'role_id' => $cashierRole->id,
-                    'name' => 'Kasir 2',
-                    'password' => Hash::make('password'),
+                    'name' => 'Kasir Dua',
+                    'password' => Hash::make('kasir123'),
                 ]
             );
-        }
 
-        // Create Customer User for testing
-        if ($customerRole) {
             User::firstOrCreate(
-                ['email' => 'customer@foodstall.com'],
+                ['email' => 'kasir3@foodstall.com'],
                 [
-                    'role_id' => $customerRole->id,
-                    'name' => 'Pelanggan Test',
-                    'password' => Hash::make('password'),
+                    'role_id' => $cashierRole->id,
+                    'name' => 'Kasir Tiga',
+                    'password' => Hash::make('kasir123'),
                 ]
             );
         }

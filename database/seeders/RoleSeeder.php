@@ -14,20 +14,12 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             [
-                'name' => 'admin',
-                'description' => 'Administrator with full access to manage users and view all reports',
+                'name' => 'Admin',
+                'description' => 'Administrator with full access to system',
             ],
             [
-                'name' => 'owner',
-                'description' => 'Food stall owner who can manage menu, categories, orders and view sales reports',
-            ],
-            [
-                'name' => 'cashier',
-                'description' => 'Cashier who can create orders and process transactions',
-            ],
-            [
-                'name' => 'customer',
-                'description' => 'Customer who can place orders and view their order history',
+                'name' => 'Cashier',
+                'description' => 'Cashier who can manage orders and transactions',
             ],
         ];
 
