@@ -5,21 +5,69 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
+                    @if(auth()->user()->role && strtolower(auth()->user()->role->name) === 'cashier')
+                        <a href="{{ route('cashier.dashboard') }}">
+                            <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        </a>
+                    @else
+                        <a href="{{ route('dashboard') }}">
+                            <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        </a>
+                    @endif
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+                    @if(auth()->user()->role && strtolower(auth()->user()->role->name) === 'cashier')
+                        <!-- Cashier Navigation -->
+                        <x-nav-link :href="route('cashier.dashboard')" :active="request()->routeIs('cashier.dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('cashier.pos')" :active="request()->routeIs('cashier.pos')">
+                            {{ __('POS / Kasir') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('cashier.orders')" :active="request()->routeIs('cashier.orders')">
+                            {{ __('Pesanan') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('cashier.transactions')" :active="request()->routeIs('cashier.transactions')">
+                            {{ __('Transaksi') }}
+                        </x-nav-link>
+                    @else
+                        <!-- Admin Navigation -->
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
+                            {{ __('Kategori') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('menus.index')" :active="request()->routeIs('menus.*')">
+                            {{ __('Menu') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                            {{ __('Pesanan') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('transactions.index')" :active="request()->routeIs('transactions.*')">
+                            {{ __('Transaksi') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('cashier.pos')" :active="request()->routeIs('cashier.pos')">
+                            {{ __('POS') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <!-- Role Badge -->
+                @if(auth()->user()->role)
+                <span class="px-3 py-1 text-xs font-semibold rounded-full mr-3
+                    @if(strtolower(auth()->user()->role->name) === 'admin') bg-purple-100 text-purple-800
+                    @else bg-green-100 text-green-800
+                    @endif">
+                    {{ ucfirst(auth()->user()->role->name) }}
+                </span>
+                @endif
+
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -67,9 +115,41 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
+            @if(auth()->user()->role && strtolower(auth()->user()->role->name) === 'cashier')
+                <!-- Cashier Mobile Navigation -->
+                <x-responsive-nav-link :href="route('cashier.dashboard')" :active="request()->routeIs('cashier.dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('cashier.pos')" :active="request()->routeIs('cashier.pos')">
+                    {{ __('POS / Kasir') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('cashier.orders')" :active="request()->routeIs('cashier.orders')">
+                    {{ __('Pesanan') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('cashier.transactions')" :active="request()->routeIs('cashier.transactions')">
+                    {{ __('Transaksi') }}
+                </x-responsive-nav-link>
+            @else
+                <!-- Admin Mobile Navigation -->
+                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
+                    {{ __('Kategori') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('menus.index')" :active="request()->routeIs('menus.*')">
+                    {{ __('Menu') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                    {{ __('Pesanan') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('transactions.index')" :active="request()->routeIs('transactions.*')">
+                    {{ __('Transaksi') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('cashier.pos')" :active="request()->routeIs('cashier.pos')">
+                    {{ __('POS') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
@@ -77,6 +157,14 @@
             <div class="px-4">
                 <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                @if(auth()->user()->role)
+                <span class="inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full
+                    @if(strtolower(auth()->user()->role->name) === 'admin') bg-purple-100 text-purple-800
+                    @else bg-green-100 text-green-800
+                    @endif">
+                    {{ ucfirst(auth()->user()->role->name) }}
+                </span>
+                @endif
             </div>
 
             <div class="mt-3 space-y-1">

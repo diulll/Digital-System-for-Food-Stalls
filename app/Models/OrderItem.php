@@ -13,9 +13,11 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'menu_id',
-        'quantity',
+        'menu_name',
         'price',
+        'quantity',
         'subtotal',
+        'notes',
     ];
 
     protected $casts = [
@@ -24,19 +26,18 @@ class OrderItem extends Model
         'subtotal' => 'decimal:2',
     ];
 
-    /**
-     * Get the order that owns the order item.
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * Get the menu that owns the order item.
-     */
     public function menu(): BelongsTo
     {
         return $this->belongsTo(Menu::class);
+    }
+
+    public function getFormattedSubtotalAttribute(): string
+    {
+        return 'Rp ' . number_format($this->subtotal, 0, ',', '.');
     }
 }

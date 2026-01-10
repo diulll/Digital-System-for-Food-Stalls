@@ -13,49 +13,71 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
         'order_number',
-        'total_price',
+        'user_id',
+        'customer_name',
+        'table_number',
         'status',
+        'subtotal',
+        'tax',
+        'discount',
+        'total',
+        'total_price',
+        'notes',
     ];
 
     protected $casts = [
+        'subtotal' => 'decimal:2',
+        'tax' => 'decimal:2',
+        'discount' => 'decimal:2',
+        'total' => 'decimal:2',
         'total_price' => 'decimal:2',
     ];
 
-    /**
-     * Get the user that owns the order.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     /**
-     * Get the order items for this order.
+     * Alias for items() relation
      */
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    /**
-     * Get the transaction associated with this order.
-     */
     public function transaction(): HasOne
     {
         return $this->hasOne(Transaction::class);
     }
 
-    /**
-     * Generate unique order number.
-     */
     public static function generateOrderNumber(): string
     {
         $date = now()->format('Ymd');
-        $lastOrder = self::whereDate('created_at', now()->toDateString())->latest()->first();
-        $increment = $lastOrder ? (int) substr($lastOrder->order_number, -4) + 1 : 1;
-        
-        return 'ORD-' . $date . '-' . str_pad($increment, 4, '0', STR_PAD_LEFT);
+        $lastOrder = self::whereDate('created_at', today())->latest()->first();
+        $sequence = $lastOrder ? intval(substr($lastOrder->order_number, -4)) + 1 : 1;
+        return 'ORD-' . $date . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+    }
+
+    public function getFormattedTotalAttribute(): string
+    {
+        return 'Rp ' . number_format($this->total, 0, ',', '.');
+    }
+
+    public function getStatusBadgeAttribute(): string
+    {
+        return match($this->status) {
+            'pending' => '<span class="badge bg-warning text-dark">Pending</span>',
+            'processing' => '<span class="badge bg-info">Processing</span>',
+            'completed' => '<span class="badge bg-success">Completed</span>',
+            'cancelled' => '<span class="badge bg-danger">Cancelled</span>',
+            default => '<span class="badge bg-secondary">Unknown</span>',
+        };
     }
 }

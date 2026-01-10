@@ -11,35 +11,50 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'order_id',
         'transaction_number',
-        'amount',
-        'payment_status',
-        'paid_at',
+        'order_id',
+        'user_id',
+        'payment_method',
+        'amount_paid',
+        'change',
+        'status',
     ];
 
     protected $casts = [
-        'amount' => 'decimal:2',
-        'paid_at' => 'datetime',
+        'amount_paid' => 'decimal:2',
+        'change' => 'decimal:2',
     ];
 
-    /**
-     * Get the order that owns the transaction.
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * Generate unique transaction number.
-     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public static function generateTransactionNumber(): string
     {
         $date = now()->format('Ymd');
-        $lastTransaction = self::whereDate('created_at', now()->toDateString())->latest()->first();
-        $increment = $lastTransaction ? (int) substr($lastTransaction->transaction_number, -4) + 1 : 1;
-        
-        return 'TRX-' . $date . '-' . str_pad($increment, 4, '0', STR_PAD_LEFT);
+        $lastTransaction = self::whereDate('created_at', today())->latest()->first();
+        $sequence = $lastTransaction ? intval(substr($lastTransaction->transaction_number, -4)) + 1 : 1;
+        return 'TRX-' . $date . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+    }
+
+    public function getFormattedAmountAttribute(): string
+    {
+        return 'Rp ' . number_format($this->amount_paid, 0, ',', '.');
+    }
+
+    public function getStatusBadgeAttribute(): string
+    {
+        return match($this->status) {
+            'success' => '<span class="badge bg-success">Success</span>',
+            'failed' => '<span class="badge bg-danger">Failed</span>',
+            'refunded' => '<span class="badge bg-warning text-dark">Refunded</span>',
+            default => '<span class="badge bg-secondary">Unknown</span>',
+        };
     }
 }

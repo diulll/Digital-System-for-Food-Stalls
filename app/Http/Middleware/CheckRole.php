@@ -19,9 +19,19 @@ class CheckRole
             return redirect()->route('login');
         }
 
-        $userRole = auth()->user()->role->name;
+        $user = auth()->user();
+        
+        // If user doesn't have a role, deny access
+        if (!$user->role) {
+            abort(403, 'User role not assigned.');
+        }
 
-        if (!in_array($userRole, $roles)) {
+        $userRole = strtolower($user->role->name);
+
+        // Convert all role parameters to lowercase for comparison
+        $allowedRoles = array_map('strtolower', $roles);
+
+        if (!in_array($userRole, $allowedRoles)) {
             abort(403, 'Unauthorized access.');
         }
 

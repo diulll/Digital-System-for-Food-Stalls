@@ -16,12 +16,15 @@ class Menu extends Model
         'name',
         'description',
         'price',
+        'image',
         'stock',
+        'is_available',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'stock' => 'integer',
+        'is_available' => 'boolean',
     ];
 
     /**
@@ -38,5 +41,10 @@ class Menu extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function getFormattedPriceAttribute(): string
+    {
+        return 'Rp ' . number_format($this->price, 0, ',', '.');
     }
 }
