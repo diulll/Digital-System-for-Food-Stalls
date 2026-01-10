@@ -13,12 +13,18 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     /**
-     * Display dashboard for Admin and Cashier
+     * Display dashboard - Different for Admin and Cashier
      */
     public function index()
     {
         $user = auth()->user();
 
+        // Redirect Kasir to their own dashboard
+        if ($user->role && $user->role->name === 'Cashier') {
+            return redirect()->route('cashier.dashboard');
+        }
+
+        // Admin Dashboard Only
         // Statistics
         $stats = [
             'total_categories' => Category::count(),
@@ -26,13 +32,9 @@ class DashboardController extends Controller
             'total_orders' => Order::count(),
             'total_transactions' => Transaction::where('payment_status', 'Paid')->count(),
             'total_income' => Transaction::where('payment_status', 'Paid')->sum('amount'),
-            'pending_orders' => Order::where('status', 'Pending')->count(),
+            'pending_orders' => Order::where('status', 'pending')->count(),
+            'total_users' => User::count(),
         ];
-
-        // Add user count for Admin only
-        if ($user->role && $user->role->name === 'Admin') {
-            $stats['total_users'] = User::count();
-        }
 
         // Recent orders
         $recentOrders = Order::with(['user', 'orderItems.menu'])
