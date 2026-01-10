@@ -36,17 +36,22 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Get or create Customer role
-        $customerRole = Role::firstOrCreate(
-            ['name' => 'Customer'],
-            ['description' => 'Customer role with basic access']
-        );
+        // Get Cashier role
+        $cashierRole = Role::where('name', 'Cashier')->first();
+        
+        if (!$cashierRole) {
+            // Create Cashier role if not exists
+            $cashierRole = Role::create([
+                'name' => 'Cashier',
+                'description' => 'Cashier who can manage orders and transactions'
+            ]);
+        }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => $customerRole->id,
+            'role_id' => $cashierRole->id,
         ]);
 
         event(new Registered($user));

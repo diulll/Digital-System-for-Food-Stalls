@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Menu;
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -14,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     /**
-     * Display dashboard.
+     * Display dashboard for Admin and Cashier
      */
     public function index()
     {
@@ -30,12 +29,13 @@ class DashboardController extends Controller
             'pending_orders' => Order::where('status', 'Pending')->count(),
         ];
 
+        // Add user count for Admin only
         if ($user->role && $user->role->name === 'Admin') {
             $stats['total_users'] = User::count();
         }
 
         // Recent orders
-        $recentOrders = Order::with(['user', 'orderItems'])
+        $recentOrders = Order::with(['user', 'orderItems.menu'])
             ->latest()
             ->take(5)
             ->get();
@@ -44,21 +44,22 @@ class DashboardController extends Controller
         $lowStockMenus = Menu::where('stock', '<', 10)
             ->with('category')
             ->orderBy('stock', 'asc')
+            ->limit(10)
             ->get();
 
         // Top selling menus
-        $topMenus = Menu::select('menus.name', DB::raw('SUM(order_items.quantity) as total_sold'))
-            ->join('order_items', 'menus.id', '=', 'order_items.menu_id')
+        $topMenus = Menu::select('menus.name', DB::raw('COALESCE(SUM(order_items.quantity), 0) as total_sold'))
+            ->leftJoin('order_items', 'menus.id', '=', 'order_items.menu_id')
             ->groupBy('menus.id', 'menus.name')
             ->orderBy('total_sold', 'desc')
             ->limit(5)
             ->get();
 
         // Sales per category
-        $salesByCategory = Category::select('categories.name', DB::raw('COUNT(orders.id) as total_orders'))
-            ->join('menus', 'categories.id', '=', 'menus.category_id')
-            ->join('order_items', 'menus.id', '=', 'order_items.menu_id')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+        $salesByCategory = Category::select('categories.name', DB::raw('COALESCE(COUNT(DISTINCT orders.id), 0) as total_orders'))
+            ->leftJoin('menus', 'categories.id', '=', 'menus.category_id')
+            ->leftJoin('order_items', 'menus.id', '=', 'order_items.menu_id')
+            ->leftJoin('orders', 'order_items.order_id', '=', 'orders.id')
             ->groupBy('categories.id', 'categories.name')
             ->get();
 
