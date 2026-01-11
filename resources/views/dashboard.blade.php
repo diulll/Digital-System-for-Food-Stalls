@@ -17,6 +17,29 @@
                 </div>
             </div>
 
+            <!-- Today's Summary Card -->
+            <div class="mb-6">
+                <div class="bg-green-500 overflow-hidden shadow-lg sm:rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-4">📊 Statistik Hari Ini</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-white rounded-lg p-4 shadow">
+                                <p class="text-gray-500 text-sm">Pesanan Hari Ini</p>
+                                <p class="text-3xl font-bold text-green-600">{{ $stats['orders_today'] ?? 0 }}</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow">
+                                <p class="text-gray-500 text-sm">Transaksi Sukses</p>
+                                <p class="text-3xl font-bold text-blue-600">{{ $stats['transactions_today'] ?? 0 }}</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow">
+                                <p class="text-gray-500 text-sm">Pendapatan Hari Ini</p>
+                                <p class="text-3xl font-bold text-purple-600">Rp {{ number_format($stats['income_today'] ?? 0, 0, ',', '.') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Statistics Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 <!-- Total Menus -->
