@@ -13,26 +13,19 @@ class Transaction extends Model
     protected $fillable = [
         'transaction_number',
         'order_id',
-        'user_id',
-        'payment_method',
-        'amount_paid',
-        'change',
-        'status',
+        'amount',
+        'payment_status',
+        'paid_at',
     ];
 
     protected $casts = [
-        'amount_paid' => 'decimal:2',
-        'change' => 'decimal:2',
+        'amount' => 'decimal:2',
+        'paid_at' => 'datetime',
     ];
 
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 
     public static function generateTransactionNumber(): string
@@ -45,16 +38,17 @@ class Transaction extends Model
 
     public function getFormattedAmountAttribute(): string
     {
-        return 'Rp ' . number_format($this->amount_paid, 0, ',', '.');
+        return 'Rp ' . number_format($this->amount, 0, ',', '.');
     }
 
     public function getStatusBadgeAttribute(): string
     {
-        return match($this->status) {
-            'success' => '<span class="badge bg-success">Success</span>',
-            'failed' => '<span class="badge bg-danger">Failed</span>',
-            'refunded' => '<span class="badge bg-warning text-dark">Refunded</span>',
-            default => '<span class="badge bg-secondary">Unknown</span>',
+        return match($this->payment_status) {
+            'Paid' => '<span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Lunas</span>',
+            'Pending' => '<span class="px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">Pending</span>',
+            'Failed' => '<span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Gagal</span>',
+            'Refunded' => '<span class="px-2 py-1 text-xs font-semibold text-purple-800 bg-purple-100 rounded-full">Refund</span>',
+            default => '<span class="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 rounded-full">Unknown</span>',
         };
     }
 }
