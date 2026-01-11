@@ -59,6 +59,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pos', [CashierController::class, 'pos'])->name('pos');
         Route::post('/pos/order', [CashierController::class, 'storeOrder'])->name('pos.store');
         Route::get('/pos/menus', [CashierController::class, 'getMenus'])->name('pos.menus');
+        Route::get('/pos/categories', [CashierController::class, 'getCategories'])->name('pos.categories');
 
         // Order Management for Cashier
         Route::get('/orders', [CashierController::class, 'pendingOrders'])->name('orders');
