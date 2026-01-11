@@ -3,12 +3,23 @@
 @section('title', 'Point of Sale')
 
 @section('content')
-<div class="flex flex-col lg:flex-row gap-6" x-data="posApp()">
+<div class="flex flex-col lg:flex-row gap-6" x-data="posApp()" x-init="init()">
     <!-- Left Side - Menu List -->
     <div class="lg:w-2/3">
         <div class="bg-white rounded-lg shadow-lg p-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <h2 class="text-xl font-bold text-gray-900">Pilih Menu</h2>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-xl font-bold text-gray-900">Pilih Menu</h2>
+                    <button @click="refreshMenus()" 
+                            :disabled="isLoadingMenus"
+                            class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                            title="Refresh Menu">
+                        <svg class="h-5 w-5" :class="{ 'animate-spin': isLoadingMenus }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                    <span x-show="lastRefreshed" class="text-xs text-gray-500" x-text="'Update: ' + lastRefreshed"></span>
+                </div>
                 
                 <!-- Category Filter -->
                 <div class="flex flex-wrap gap-2">
@@ -17,13 +28,13 @@
                             class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                         Semua
                     </button>
-                    @foreach($categories as $category)
-                    <button @click="filterCategory = '{{ $category->id }}'" 
-                            :class="filterCategory === '{{ $category->id }}' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'"
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                        {{ $category->name }}
-                    </button>
-                    @endforeach
+                    <template x-for="category in categories" :key="category.id">
+                        <button @click="filterCategory = category.id.toString()" 
+                                :class="filterCategory === category.id.toString() ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'"
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                                x-text="category.name">
+                        </button>
+                    </template>
                 </div>
             </div>
 
@@ -37,25 +48,46 @@
 
             <!-- Menu Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                @foreach($menus as $menu)
-                <div class="menu-item border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
-                     :class="{ 'hidden': !isMenuVisible({{ $menu->id }}, '{{ $menu->category_id }}', '{{ strtolower($menu->name) }}') }"
-                     @click="addToCart({{ $menu->id }}, '{{ $menu->name }}', {{ $menu->price }}, {{ $menu->stock }})">
-                    @if($menu->image)
-                    <img src="{{ asset('storage/' . $menu->image) }}" alt="{{ $menu->name }}" 
-                         class="w-full h-24 object-cover rounded-lg mb-2">
-                    @else
-                    <div class="w-full h-24 bg-gray-200 rounded-lg mb-2 flex items-center justify-center">
-                        <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                <template x-for="menu in filteredMenus" :key="menu.id">
+                    <div class="menu-item border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
+                         @click="addToCart(menu.id, menu.name, menu.price, menu.stock, menu.image)">
+                        <template x-if="menu.image">
+                            <img :src="'/storage/' + menu.image" :alt="menu.name" 
+                                 class="w-full h-24 object-cover rounded-lg mb-2">
+                        </template>
+                        <template x-if="!menu.image">
+                            <div class="w-full h-24 bg-gray-200 rounded-lg mb-2 flex items-center justify-center">
+                                <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                        </template>
+                        <h3 class="font-semibold text-sm text-gray-900 truncate" x-text="menu.name"></h3>
+                        <p class="text-green-600 font-bold text-sm" x-text="'Rp ' + formatNumber(menu.price)"></p>
+                        <p class="text-xs text-gray-500" x-text="'Stok: ' + menu.stock"></p>
                     </div>
-                    @endif
-                    <h3 class="font-semibold text-sm text-gray-900 truncate">{{ $menu->name }}</h3>
-                    <p class="text-green-600 font-bold text-sm">Rp {{ number_format($menu->price, 0, ',', '.') }}</p>
-                    <p class="text-xs text-gray-500">Stok: {{ $menu->stock }}</p>
-                </div>
-                @endforeach
+                </template>
+                
+                <!-- Empty State -->
+                <template x-if="filteredMenus.length === 0 && !isLoadingMenus">
+                    <div class="col-span-full text-center py-8 text-gray-500">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p>Tidak ada menu ditemukan</p>
+                    </div>
+                </template>
+                
+                <!-- Loading State -->
+                <template x-if="isLoadingMenus">
+                    <div class="col-span-full text-center py-8">
+                        <svg class="animate-spin mx-auto h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="mt-2 text-gray-500">Memuat menu...</p>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
@@ -213,14 +245,118 @@
 function posApp() {
     return {
         cart: [],
+        menus: [],
+        categories: [],
         filterCategory: '',
         searchQuery: '',
         paymentMethod: 'cash',
         amountPaid: 0,
         isProcessing: false,
+        isLoadingMenus: false,
         showSuccessModal: false,
         lastTransaction: null,
         lastChange: 0,
+        lastRefreshed: null,
+        refreshInterval: null,
+
+        async init() {
+            // Load initial data
+            await this.loadCategories();
+            await this.refreshMenus();
+            
+            // Auto-refresh setiap 30 detik
+            this.refreshInterval = setInterval(() => {
+                this.refreshMenus();
+            }, 30000);
+        },
+
+        async loadCategories() {
+            try {
+                const response = await fetch('{{ route("cashier.pos.categories") }}', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+                if (!response.ok) {
+                    console.error('Categories fetch failed:', response.status, response.statusText);
+                    // If unauthorized, reload page to trigger login
+                    if (response.status === 401 || response.status === 403) {
+                        console.log('Session may have expired. Please refresh the page.');
+                    }
+                    return;
+                }
+                const data = await response.json();
+                if (data.success) {
+                    this.categories = data.categories;
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        },
+
+        async refreshMenus() {
+            this.isLoadingMenus = true;
+            try {
+                const response = await fetch('{{ route("cashier.pos.menus") }}', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+                if (!response.ok) {
+                    console.error('Menus fetch failed:', response.status, response.statusText);
+                    // If unauthorized, reload page to trigger login
+                    if (response.status === 401 || response.status === 403) {
+                        console.log('Session may have expired. Please refresh the page.');
+                    }
+                    this.isLoadingMenus = false;
+                    return;
+                }
+                const data = await response.json();
+                if (data.success) {
+                    this.menus = data.menus;
+                    this.lastRefreshed = new Date().toLocaleTimeString('id-ID');
+                    
+                    // Update stok di keranjang jika ada perubahan
+                    this.cart.forEach(cartItem => {
+                        const updatedMenu = this.menus.find(m => m.id === cartItem.menu_id);
+                        if (updatedMenu) {
+                            cartItem.stock = updatedMenu.stock;
+                            cartItem.price = parseFloat(updatedMenu.price);
+                            // Jika quantity melebihi stok, sesuaikan
+                            if (cartItem.quantity > updatedMenu.stock) {
+                                cartItem.quantity = updatedMenu.stock;
+                                if (cartItem.quantity === 0) {
+                                    this.removeFromCart(cartItem.menu_id);
+                                }
+                            }
+                        } else {
+                            // Menu tidak tersedia lagi, hapus dari keranjang
+                            this.removeFromCart(cartItem.menu_id);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error refreshing menus:', error);
+            } finally {
+                this.isLoadingMenus = false;
+            }
+        },
+
+        get filteredMenus() {
+            return this.menus.filter(menu => {
+                const categoryMatch = this.filterCategory === '' || menu.category_id.toString() === this.filterCategory;
+                const searchMatch = this.searchQuery === '' || menu.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+                return categoryMatch && searchMatch;
+            });
+        },
 
         get totalPrice() {
             return this.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -240,7 +376,7 @@ function posApp() {
             return categoryMatch && searchMatch;
         },
 
-        addToCart(menuId, name, price, stock) {
+        addToCart(menuId, name, price, stock, image) {
             const existingItem = this.cart.find(item => item.menu_id === menuId);
             
             if (existingItem) {
@@ -253,9 +389,10 @@ function posApp() {
                 this.cart.push({
                     menu_id: menuId,
                     name: name,
-                    price: price,
+                    price: parseFloat(price),
                     quantity: 1,
-                    stock: stock
+                    stock: stock,
+                    image: image
                 });
             }
         },
@@ -330,6 +467,9 @@ function posApp() {
                     this.showSuccessModal = true;
                     this.cart = [];
                     this.amountPaid = 0;
+                    
+                    // Refresh menu untuk update stok terbaru
+                    await this.refreshMenus();
                 } else {
                     alert(data.message || 'Terjadi kesalahan!');
                 }
@@ -345,6 +485,8 @@ function posApp() {
             this.showSuccessModal = false;
             this.lastTransaction = null;
             this.lastChange = 0;
+            // Redirect ke dashboard kasir
+            window.location.href = '{{ route("cashier.dashboard") }}';
         },
 
         printReceipt() {
