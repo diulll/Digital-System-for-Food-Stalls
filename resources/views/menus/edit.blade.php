@@ -9,7 +9,7 @@
 </div>
 
 <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
-    <form action="{{ route('menus.update', $menu) }}" method="POST">
+    <form action="{{ route('menus.update', $menu) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         
@@ -63,6 +63,22 @@
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
+        </div>
+
+        <div class="mb-6">
+            <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Gambar Menu</label>
+            @if($menu->image)
+            <div class="mb-3">
+                <img src="{{ asset('storage/' . $menu->image) }}" alt="{{ $menu->name }}" class="w-32 h-32 object-cover rounded-lg border">
+                <p class="text-gray-500 text-xs mt-1">Gambar saat ini</p>
+            </div>
+            @endif
+            <input type="file" name="image" id="image" accept="image/*"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('image') border-red-500 @enderror">
+            <p class="text-gray-500 text-xs mt-1">Format: JPEG, PNG, JPG, GIF, WEBP. Maksimal 2MB. Kosongkan jika tidak ingin mengubah gambar.</p>
+            @error('image')
+            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            @enderror
         </div>
 
         <div class="flex space-x-3">
