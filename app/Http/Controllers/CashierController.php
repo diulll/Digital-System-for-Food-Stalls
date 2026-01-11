@@ -273,4 +273,17 @@ class CashierController extends Controller
             'menus' => $menus,
         ]);
     }
+
+    /**
+     * Get categories list for API.
+     */
+    public function getCategories()
+    {
+        $categories = Category::all();
+
+        return response()->json([
+            'success' => true,
+            'categories' => $categories,
+        ]);
+    }
 }
