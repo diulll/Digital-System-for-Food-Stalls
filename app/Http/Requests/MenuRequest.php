@@ -21,12 +21,15 @@ class MenuRequest extends FormRequest
      */
     public function rules(): array
     {
+        $imageRule = $this->isMethod('post') ? 'nullable' : 'nullable';
+        
         return [
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
+            'image' => $imageRule . '|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ];
     }
 
@@ -48,6 +51,9 @@ class MenuRequest extends FormRequest
             'stock.required' => 'Stok wajib diisi.',
             'stock.integer' => 'Stok harus berupa angka bulat.',
             'stock.min' => 'Stok tidak boleh negatif.',
+            'image.image' => 'File harus berupa gambar.',
+            'image.mimes' => 'Format gambar harus: jpeg, png, jpg, gif, atau webp.',
+            'image.max' => 'Ukuran gambar maksimal 2MB.',
         ];
     }
 }
