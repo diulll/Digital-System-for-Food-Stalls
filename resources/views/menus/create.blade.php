@@ -9,7 +9,7 @@
 </div>
 
 <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
-    <form action="{{ route('menus.store') }}" method="POST">
+    <form action="{{ route('menus.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         
         <div class="mb-4">
@@ -62,6 +62,16 @@
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
+        </div>
+
+        <div class="mb-6">
+            <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Gambar Menu</label>
+            <input type="file" name="image" id="image" accept="image/*"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('image') border-red-500 @enderror">
+            <p class="text-gray-500 text-xs mt-1">Format: JPEG, PNG, JPG, GIF, WEBP. Maksimal 2MB.</p>
+            @error('image')
+            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            @enderror
         </div>
 
         <div class="flex space-x-3">
