@@ -32,8 +32,16 @@ class DashboardController extends Controller
             'total_orders' => Order::count(),
             'total_transactions' => Transaction::where('payment_status', 'Paid')->count(),
             'total_income' => Transaction::where('payment_status', 'Paid')->sum('amount'),
-            'pending_orders' => Order::where('status', 'pending')->count(),
+            'pending_orders' => Order::where('status', 'Pending')->count(),
             'total_users' => User::count(),
+            // Today's statistics
+            'orders_today' => Order::whereDate('created_at', today())->count(),
+            'income_today' => Transaction::whereDate('created_at', today())
+                ->where('payment_status', 'Paid')
+                ->sum('amount'),
+            'transactions_today' => Transaction::whereDate('created_at', today())
+                ->where('payment_status', 'Paid')
+                ->count(),
         ];
 
         // Recent orders
