@@ -6,6 +6,7 @@ use App\Http\Requests\MenuRequest;
 use App\Models\Category;
 use App\Models\Menu;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
@@ -44,7 +45,13 @@ class MenuController extends Controller
      */
     public function store(MenuRequest $request)
     {
-        Menu::create($request->validated());
+        $data = $request->validated();
+        
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('menus', 'public');
+        }
+        
+        Menu::create($data);
         
         return redirect()->route('menus.index')
             ->with('success', 'Menu berhasil ditambahkan.');
@@ -73,7 +80,17 @@ class MenuController extends Controller
      */
     public function update(MenuRequest $request, Menu $menu)
     {
-        $menu->update($request->validated());
+        $data = $request->validated();
+        
+        if ($request->hasFile('image')) {
+            // Hapus gambar lama jika ada
+            if ($menu->image) {
+                Storage::disk('public')->delete($menu->image);
+            }
+            $data['image'] = $request->file('image')->store('menus', 'public');
+        }
+        
+        $menu->update($data);
         
         return redirect()->route('menus.index')
             ->with('success', 'Menu berhasil diperbarui.');
@@ -84,6 +101,11 @@ class MenuController extends Controller
      */
     public function destroy(Menu $menu)
     {
+        // Hapus gambar jika ada
+        if ($menu->image) {
+            Storage::disk('public')->delete($menu->image);
+        }
+        
         $menu->delete();
         
         return redirect()->route('menus.index')
