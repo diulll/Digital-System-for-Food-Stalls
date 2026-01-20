@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\MenuController;
+use App\Http\Controllers\Api\V1\OngkirController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\TransactionController;
 use Illuminate\Support\Facades\Route;
@@ -30,7 +31,18 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
     Route::get('/menus', [MenuController::class, 'index'])->name('menus.index');
     Route::get('/menus/{menu}', [MenuController::class, 'show'])->name('menus.show');
+
+    // Public Ongkir Routes (untuk cek ongkir tanpa login)
+    Route::get('/kota', [OngkirController::class, 'getKota'])->name('kota.index');
+    Route::get('/ongkir', [OngkirController::class, 'index'])->name('ongkir.index');
+    Route::get('/ongkir/tarif', [OngkirController::class, 'listTarif'])->name('ongkir.tarif');
+    Route::post('/ongkir/calculate', [OngkirController::class, 'calculate'])->name('ongkir.calculate');
 });
+
+// Route untuk tarif berdasarkan kota asal dan tujuan (sesuai soal no 6)
+// GET /api/tarif/{kota_asal_id}/{kota_tujuan_id}
+Route::get('/tarif/{kota_asal_id}/{kota_tujuan_id}', [OngkirController::class, 'getTarifByRoute'])
+    ->name('api.tarif.route');
 
 // ==================== PROTECTED ROUTES (Authentication Required) ====================
 Route::prefix('v1')->name('api.v1.')->middleware('auth:sanctum')->group(function () {
@@ -52,6 +64,11 @@ Route::prefix('v1')->name('api.v1.')->middleware('auth:sanctum')->group(function
         Route::post('/menus', [MenuController::class, 'store'])->name('menus.store');
         Route::put('/menus/{menu}', [MenuController::class, 'update'])->name('menus.update');
         Route::delete('/menus/{menu}', [MenuController::class, 'destroy'])->name('menus.destroy');
+        
+        // Ongkir Management (Admin only - CRUD)
+        Route::post('/ongkir', [OngkirController::class, 'store'])->name('ongkir.store');
+        Route::put('/ongkir/{ongkir}', [OngkirController::class, 'update'])->name('ongkir.update');
+        Route::delete('/ongkir/{ongkir}', [OngkirController::class, 'destroy'])->name('ongkir.destroy');
         
         // All Orders (Admin can see all orders)
         Route::get('/admin/orders', [OrderController::class, 'index'])->name('admin.orders.index');
