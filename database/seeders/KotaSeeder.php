@@ -11,53 +11,50 @@ class KotaSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * Data sesuai dengan gambar tabel kota
      */
     public function run(): void
     {
+        // Buat propinsi yang dibutuhkan terlebih dahulu
+        $propinsis = [
+            ['id' => 1, 'nama' => 'DI Yogyakarta'],
+            ['id' => 2, 'nama' => 'Jawa Tengah'],
+            ['id' => 3, 'nama' => 'Jawa Barat'],
+            ['id' => 4, 'nama' => 'DKI Jakarta'],
+            ['id' => 5, 'nama' => 'Jawa Timur'],
+        ];
+
+        foreach ($propinsis as $propinsi) {
+            Propinsi::updateOrCreate(
+                ['id' => $propinsi['id']],
+                ['nama' => $propinsi['nama']]
+            );
+        }
+
+        // Data kota sesuai gambar
+        // Format: [id, propinsi_id, nama_kota]
         $kotas = [
-            // DKI Jakarta (id: 11)
-            ['propinsi_nama' => 'DKI Jakarta', 'nama' => 'Jakarta Pusat'],
-            ['propinsi_nama' => 'DKI Jakarta', 'nama' => 'Jakarta Utara'],
-            ['propinsi_nama' => 'DKI Jakarta', 'nama' => 'Jakarta Barat'],
-            ['propinsi_nama' => 'DKI Jakarta', 'nama' => 'Jakarta Selatan'],
-            ['propinsi_nama' => 'DKI Jakarta', 'nama' => 'Jakarta Timur'],
-            
-            // Jawa Barat (id: 12)
-            ['propinsi_nama' => 'Jawa Barat', 'nama' => 'Bandung'],
-            ['propinsi_nama' => 'Jawa Barat', 'nama' => 'Bekasi'],
-            ['propinsi_nama' => 'Jawa Barat', 'nama' => 'Bogor'],
-            ['propinsi_nama' => 'Jawa Barat', 'nama' => 'Depok'],
-            ['propinsi_nama' => 'Jawa Barat', 'nama' => 'Cirebon'],
-            
-            // Jawa Tengah (id: 13)
-            ['propinsi_nama' => 'Jawa Tengah', 'nama' => 'Semarang'],
-            ['propinsi_nama' => 'Jawa Tengah', 'nama' => 'Solo'],
-            ['propinsi_nama' => 'Jawa Tengah', 'nama' => 'Pekalongan'],
-            
-            // DI Yogyakarta (id: 14)
-            ['propinsi_nama' => 'DI Yogyakarta', 'nama' => 'Yogyakarta'],
-            ['propinsi_nama' => 'DI Yogyakarta', 'nama' => 'Sleman'],
-            ['propinsi_nama' => 'DI Yogyakarta', 'nama' => 'Bantul'],
-            
-            // Jawa Timur (id: 15)
-            ['propinsi_nama' => 'Jawa Timur', 'nama' => 'Surabaya'],
-            ['propinsi_nama' => 'Jawa Timur', 'nama' => 'Malang'],
-            ['propinsi_nama' => 'Jawa Timur', 'nama' => 'Sidoarjo'],
-            
-            // Banten (id: 16)
-            ['propinsi_nama' => 'Banten', 'nama' => 'Tangerang'],
-            ['propinsi_nama' => 'Banten', 'nama' => 'Tangerang Selatan'],
-            ['propinsi_nama' => 'Banten', 'nama' => 'Serang'],
+            ['id' => 1, 'propinsi_id' => 1, 'nama' => 'Kodya Yogyakarta'],  // propinsi_id 1 = DI Yogyakarta
+            ['id' => 2, 'propinsi_id' => 1, 'nama' => 'Bantul'],
+            ['id' => 3, 'propinsi_id' => 1, 'nama' => 'Sleman'],
+            ['id' => 4, 'propinsi_id' => 1, 'nama' => 'Kulon Progo'],
+            ['id' => 5, 'propinsi_id' => 2, 'nama' => 'Klaten'],            // propinsi_id 2 = Jawa Tengah
+            ['id' => 6, 'propinsi_id' => 2, 'nama' => 'Magelang'],
+            ['id' => 7, 'propinsi_id' => 5, 'nama' => 'Malang'],            // propinsi_id 5 = Jawa Timur
+            ['id' => 8, 'propinsi_id' => 5, 'nama' => 'Mojokerto'],
+            ['id' => 9, 'propinsi_id' => 3, 'nama' => 'Cirebon'],           // propinsi_id 3 = Jawa Barat
         ];
 
         foreach ($kotas as $kota) {
-            $propinsi = Propinsi::where('nama', $kota['propinsi_nama'])->first();
-            if ($propinsi) {
-                Kota::create([
-                    'propinsi_id' => $propinsi->id,
-                    'nama' => $kota['nama'],
-                ]);
-            }
+            Kota::updateOrCreate(
+                ['id' => $kota['id']],
+                [
+                    'propinsi_id' => $kota['propinsi_id'],
+                    'nama' => $kota['nama']
+                ]
+            );
         }
+
+        $this->command->info('Kota seeded successfully! Total: ' . count($kotas) . ' kota');
     }
 }
