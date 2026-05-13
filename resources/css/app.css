@@ -1,3 +1,51 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	:root {
+		color-scheme: light;
+	}
+
+	body {
+		@apply font-sans text-body bg-canvas antialiased;
+		background-image:
+			linear-gradient(rgba(24, 29, 38, 0.035) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(24, 29, 38, 0.035) 1px, transparent 1px);
+		background-size: 64px 64px;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		@apply font-display text-ink;
+	}
+
+	h1 {
+		@apply text-3xl md:text-4xl leading-tight;
+	}
+
+	h2 {
+		@apply text-2xl md:text-3xl leading-tight;
+	}
+
+	h3 {
+		@apply text-xl md:text-2xl leading-snug;
+	}
+
+	p {
+		@apply text-body leading-relaxed;
+	}
+
+	a {
+		@apply text-link hover:text-link-active transition-colors;
+	}
+
+	::selection {
+		background: #f5e9d4;
+		color: #181d26;
+	}
+}
